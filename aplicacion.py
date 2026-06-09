@@ -4,46 +4,47 @@ import os
 import io
 
 # =====================================================================
-# CONFIGURACIÓN DE LA PÁGINA
+# CONFIGURACIÓN DE LA PÁGINA (Estilo Dashboard Premium)
 # =====================================================================
 st.set_page_config(
-    page_title="Facturador y Liquidador de Retenciones",
-    page_icon="🧾",
-    layout="centered"
+    page_title="Sistema Maestro de Retenciones",
+    page_icon="💼",
+    layout="centered",
+    initial_sidebar_state="collapsed"
 )
 
-# Estilos CSS para simular una factura contable real
+# Estilos CSS Avanzados para una Interfaz Impecable
 st.markdown("""
 <style>
+    /* Ocultar elementos nativos para dar apariencia de Software Privado */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     header {visibility: hidden;}
     
-    .factura-box {
-        background-color: #1e293b;
-        padding: 25px;
-        border-radius: 10px;
-        border: 2px solid #334155;
-        font-family: 'Courier New', Courier, monospace;
-        margin-top: 20px;
+    /* Contenedor de Métrica Principal */
+    .kpi-container {
+        background-color: #0f172a;
+        padding: 24px;
+        border-radius: 12px;
+        text-align: center;
+        border: 1px solid #1e293b;
+        margin: 20px 0;
     }
-    .factura-linea {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 8px;
-        font-size: 16px;
-        color: #f8fafc;
+    .kpi-title {
+        color: #94a3b8;
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 600;
     }
-    .factura-total {
-        display: flex;
-        justify-content: space-between;
-        margin-top: 15px;
-        padding-top: 15px;
-        border-top: 2px dashed #64748b;
-        font-size: 20px;
-        font-weight: bold;
+    .kpi-value {
+        font-size: 38px;
         color: #22c55e;
+        font-weight: bold;
+        margin-top: 8px;
     }
+    
+    /* Firma de Autor Fija */
     .firma {
         position: fixed;
         bottom: 15px;
@@ -51,134 +52,121 @@ st.markdown("""
         color: #64748b;
         font-size: 13px;
         font-style: italic;
+        font-family: sans-serif;
+        z-index: 100;
     }
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown("<h1 style='text-align: center; color: #f8fafc;'>🧾 Liquidador Contable de Facturas</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; color: #94a3b8;'>Cálculo dinámico de Impuestos y Retenciones en Colombia</p>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center; color: #f8fafc;'>💼 Sistema Contable de Retenciones</h1>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: #94a3b8;'>Consola de Cálculo Tributario - Tabla Maestra Oficial</p>", unsafe_allow_html=True)
 st.markdown("---")
 
 # =====================================================================
-# CARGA DE DATOS
+# CARGA SEGURA Y AUTOMATIZADA DE DATOS (Optimización por Caché)
 # =====================================================================
 @st.cache_data
 def cargar_tabla_maestra():
     nombre_archivo = "retenciones_colombia.xlsx"
     ruta = os.path.join(os.getcwd(), nombre_archivo)
+    
     if not os.path.exists(ruta):
-        st.error(f"❌ No se encontró la base de datos '{nombre_archivo}'.")
+        st.error(f"❌ Error del Sistema: No se encontró la base de datos '{nombre_archivo}' en la raíz del repositorio.")
         st.stop()
+        
     return pd.read_excel(ruta)
 
 df = cargar_tabla_maestra()
 
 # =====================================================================
-# ENTRADAS PRINCIPALES DEL LIQUIDADOR
+# ENTRADAS DE USUARIO (Formularios Reactivos)
 # =====================================================================
 col1, col2 = st.columns(2)
 
 with col1:
-    subtotal = st.number_input("💰 Subtotal ($)", min_value=0.0, value=1000000.0, step=10000.0, format="%.0f")
-    
-    # Lista desplegable con los porcentajes de descuento que pediste
-    opciones_descuento = {
-        "Sin Descuento (0%)": 0.0,
-        "Descuento del 1%": 0.01,
-        "Descuento del 1.5%": 0.015,
-        "Descuento del 2%": 0.02,
-        "Descuento del 3%": 0.03,
-        "Descuento del 4%": 0.04,
-        "Descuento del 10%": 0.10,
-        "Descuento del 20%": 0.20
-    }
-    descuento_seleccionado = st.selectbox("🏷️ Seleccione Porcentaje de Descuento", list(opciones_descuento.keys()))
-    porcentaje_desc = opciones_descuento[descuento_seleccionado]
+    valor = st.number_input(
+        "💰 Base Gravable para el Cálculo ($)", 
+        min_value=0, 
+        value=1000000, 
+        step=100000,
+        format="%d"
+    )
 
 with col2:
-    # Filtro de Ciudades para ICA
-    ciudades_disponibles = sorted(df[df["Ciudad"] != "Retefuente Nacional"]["Ciudad"].unique())
-    ciudad_sel = st.selectbox("🏙️ Jurisdicción para ICA", ciudades_disponibles)
-    
-    # Filtro de Conceptos para Retefuente Nacional
-    conceptos_retefuente = df[df["Ciudad"] == "Retefuente Nacional"]["Concepto"].unique()
-    retefuente_sel = st.selectbox("🧾 Concepto de Retefuente", conceptos_retefuente)
+    # Agrupar las ubicaciones/ciudades disponibles de forma ordenada
+    ubicaciones = sorted(df["Ciudad"].unique())
+    seleccion = st.selectbox("🏙️ Seleccione Jurisdicción / Tipo", ubicaciones)
+
+# Filtrar matriz de datos según la selección del usuario
+df_filtrado = df[df["Ciudad"] == seleccion].copy()
 
 # =====================================================================
-# PROCESAMIENTO MATEMÁTICO CONTABLE
+# LÓGICA DE FORMATEO CONTABLE AVANZADO
 # =====================================================================
-# 1. Cálculo del valor del descuento en pesos basado en el porcentaje elegido
-descuentos_pesos = subtotal * porcentaje_desc
+def formatear_tarifa_dinamica(t):
+    # Formateo inteligente según el tipo de tarifa en tu documento
+    if t < 0.1:
+        return f"{t * 1000:.2f} x mil"
+    else:
+        return f"{t * 100:.1f}%"
 
-# 2. Base Gravable
-base_gravable = max(0.0, subtotal - descuentos_pesos)
+# Operaciones Matemáticas
+df_filtrado["Retención"] = df_filtrado["Tarifa"] * valor
 
-# 3. IVA (19%)
-iva_calculado = base_gravable * 0.19
+# Formateo estético para la UI de cara al usuario
+df_filtrado["Tarifa Aplicada"] = df_filtrado["Tarifa"].apply(formatear_tarifa_dinamica)
+df_filtrado["Valor Retenido ($)"] = df_filtrado["Retención"].apply(lambda x: f"${x:,.0f}")
 
-# 4. Cálculo de Retefuente Nacional seleccionada
-tarifa_retefuente = df[df["Concepto"] == retefuente_sel]["Tarifa"].values[0]
-retefuente_calculada = base_gravable * tarifa_retefuente
-
-# 5. Cálculo de Retención ICA
-df_ica_ciudad = df[df["Ciudad"] == ciudad_sel]
-concepto_ica = df_ica_ciudad["Concepto"].values[0] 
-tarifa_ica = df_ica_ciudad["Tarifa"].values[0]
-reteica_calculado = base_gravable * tarifa_ica
-
-# 6. Cálculo de Retención IVA (Equivale al 15% del IVA facturado)
-reteiva_calculado = iva_calculado * 0.15
-
-# 7. Neto Total a Pagar
-total_neto = base_gravable + iva_calculado - retefuente_calculada - reteica_calculado - reteiva_calculado
+# Ordenar de mayor a menor retención económica
+df_filtrado = df_filtrado.sort_values(by="Retención", ascending=False)
 
 # =====================================================================
-# ESTRUCTURA VISUAL EN FORMATO FACTURA
+# PRESENTACIÓN DE RESULTADOS (Dashboard)
 # =====================================================================
-st.subheader("📊 Estructura de Liquidación Generada")
+total_acumulado = df_filtrado["Retención"].sum()
 
-# Mostramos el porcentaje real al lado del texto para que sepa qué se aplicó
-texto_descuento = f"(-) Descuentos ({porcentaje_desc*100}%):" if porcentaje_desc > 0 else "(-) Descuentos:"
-
+# Renderizado del KPI de Impacto Total
 st.markdown(f"""
-<div class="factura-box">
-    <div class="factura-linea"><span>Subtotal:</span> <span>${subtotal:,.0f}</span></div>
-    <div class="factura-linea" style="color: #ef4444;"><span>{texto_descuento}</span> <span>-${descuentos_pesos:,.0f}</span></div>
-    <div class="factura-linea" style="border-top: 1px solid #475569; padding-top: 5px; font-weight: bold;"><span>Base gravable:</span> <span>${base_gravable:,.0f}</span></div>
-    <div class="factura-linea" style="color: #38bdf8;"><span>(+) IVA (19%):</span> <span>+${iva_calculado:,.0f}</span></div>
-    <div class="factura-linea" style="color: #f97316;"><span>(-) Retención en la Fuente ({retefuente_sel.split()[-1]}):</span> <span>-${retefuente_calculada:,.0f}</span></div>
-    <div class="factura-linea" style="color: #fbbf24;"><span>(-) Retención ICA ({ciudad_sel}):</span> <span>-${reteica_calculado:,.0f}</span></div>
-    <div class="factura-linea" style="color: #f43f5e;"><span>(-) Retención IVA (15% del IVA):</span> <span>-${reteiva_calculado:,.0f}</span></div>
-    <div class="factura-total"><span>(=) TOTAL NETO A PAGAR:</span> <span>${total_neto:,.0f}</span></div>
+<div class="kpi-container">
+    <div class="kpi-title">Monto de Retenciones Consolidadas</div>
+    <div class="kpi-value">${total_acumulado:,.0f}</div>
 </div>
 """, unsafe_allow_html=True)
 
-# Información informativa sobre las tarifas aplicadas detrás de escena
-with st.expander("🔍 Ver detalles de tarifas aplicadas"):
-    st.write(f"**Tarifa ReteFuente:** {tarifa_retefuente * 100}%")
-    st.write(f"**Tarifa ICA aplicada:** {concepto_ica} ({tarifa_ica if tarifa_ica >= 0.1 else tarifa_ica * 1000} x mil)")
-    st.write(f"**Tarifa ReteIVA:** 15% sobre el valor del IVA")
+st.subheader("📊 Desglose de Conceptos Aplicables")
+
+# Mostrar la tabla maestra procesada de forma limpia
+st.dataframe(
+    df_filtrado[["Concepto", "Tarifa Aplicada", "Valor Retenido ($)"]],
+    use_container_width=True,
+    hide_index=True
+)
 
 # =====================================================================
-# EXPORTACIÓN A EXCEL DEL REPORTE
+# COMPONENTE DE EXPORTACIÓN (Descargas en Tiempo Real)
 # =====================================================================
 st.markdown("---")
-df_reporte = pd.DataFrame({
-    "Concepto": ["Subtotal", f"Descuentos ({porcentaje_desc*100}%)", "Base Gravable", "IVA (19%)", f"Retención Fuente ({retefuente_sel})", f"Retención ICA ({ciudad_sel})", "Retención IVA (15%)", "Total Neto a Pagar"],
-    "Valor ($)": [subtotal, -descuentos_pesos, base_gravable, iva_calculado, -retefuente_calculada, -reteica_calculado, -reteiva_calculado, total_neto]
-})
+st.subheader("📥 Generar Reporte Corporativo")
+
+# Limpieza de columnas para el reporte Excel de salida
+df_reporte = df_filtrado[["Concepto", "Tarifa Aplicada", "Retención"]].copy()
+df_reporte.columns = ["Concepto Tributario", "Tarifa", "Valor Retenido ($)"]
 
 buffer = io.BytesIO()
 with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
-    df_reporte.to_excel(writer, index=False, sheet_name="Liquidacion_Factura")
+    df_reporte.to_excel(writer, index=False, sheet_name="Resumen de Retenciones")
 
+# Botón de Descarga Seguro
 st.download_button(
-    label="📥 Descargar esta Factura en Excel",
+    label="⬇️ Descargar Reporte en Excel",
     data=buffer.getvalue(),
-    file_name="liquidacion_factura.xlsx",
+    file_name=f"reporte_retenciones_{seleccion.lower().replace(' ', '_')}.xlsx",
     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 )
 
+# =====================================================================
+# SELLO DE AUTORÍA
+# =====================================================================
 st.markdown("""
 <div class="firma">
 Nohora Portillo
